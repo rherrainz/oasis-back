@@ -53,6 +53,14 @@ npm run dev
 
 La API queda disponible en `http://localhost:3000`.
 
+## Tests
+
+```bash
+npm run test:run
+```
+
+La suite usa Vitest y Supertest. Los endpoints se prueban con mocks de Prisma para no depender de una base de datos real durante los tests.
+
 ## Variables de entorno
 
 ```env
