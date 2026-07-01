@@ -1,9 +1,9 @@
 import express from "express";
 import { createUser } from "../controllers/userController.js";
-import { requireAuth } from "../middleware/authMiddleware.js";
+import { requireAuth, requireRole } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.post("/", requireAuth, createUser);
+router.post("/", requireAuth, requireRole("admin"), createUser);
 
 export default router;

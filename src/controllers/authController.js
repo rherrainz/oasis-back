@@ -17,8 +17,8 @@ export async function login(req, res, next) {
         return res.status(401).json({ message: "Clave de administrador incorrecta." });
       }
 
-      const token = signToken({ type: "admin-key" });
-      return res.json({ token, admin: { name: "Administrador inicial", email: null } });
+      const token = signToken({ type: "admin-key", role: "admin" });
+      return res.json({ token, admin: { name: "Administrador inicial", email: null, role: "admin" } });
     }
 
     if (!email || !password) {
@@ -35,13 +35,14 @@ export async function login(req, res, next) {
       return res.status(401).json({ message: "Credenciales incorrectas." });
     }
 
-    const token = signToken({ userId: user.id, email: user.email });
+    const token = signToken({ userId: user.id, email: user.email, role: user.role });
     return res.json({
       token,
       admin: {
         id: user.id,
         name: user.name,
-        email: user.email
+        email: user.email,
+        role: user.role
       }
     });
   } catch (error) {

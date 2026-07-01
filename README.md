@@ -25,6 +25,8 @@ Consultar también el repositorio frontend para ver la interfaz web, rutas públ
 - Hash de contraseñas: bcrypt
 - Carga de archivos: Multer
 - Repositorio de imágenes: Cloudinary
+- Organización de contenido: categorías, tags y autores
+- Búsqueda: filtros por texto, categoría, tag, autor y estado
 - Configuración de entorno: dotenv
 - CORS: cors
 - Desarrollo local: nodemon
@@ -69,14 +71,40 @@ CLOUDINARY_API_SECRET=
 ## Endpoints principales
 
 - `GET /api/posts`: lista posts publicados.
+- `GET /api/posts?search=node&category=backend&tag=api&author=rodrigo`: lista posts publicados aplicando filtros.
 - `GET /api/posts/:slug`: detalle de un post publicado.
+- `GET /api/categories`: lista categorías públicas.
+- `GET /api/tags`: lista tags públicos.
+- `GET /api/authors`: lista autores públicos.
 - `POST /api/auth/login`: login con `adminKey` o con `email` y `password`.
 - `POST /api/users`: crea un administrador. Requiere JWT.
 - `GET /api/admin/posts`: lista todos los posts. Requiere JWT.
+- `GET /api/admin/posts?status=draft&category=backend&tag=node&author=rodrigo`: lista posts admin con filtros. Requiere JWT.
 - `POST /api/admin/posts`: crea un post. Requiere JWT.
 - `PUT /api/admin/posts/:id`: edita un post. Requiere JWT.
 - `DELETE /api/admin/posts/:id`: elimina un post. Requiere JWT.
 - `POST /api/admin/upload`: sube imagen a Cloudinary con campo `image`. Requiere JWT.
+- `GET /api/admin/categories`: lista categorías. Requiere JWT.
+- `POST /api/admin/categories`: crea categoría. Requiere rol `admin`.
+- `PUT /api/admin/categories/:id`: edita categoría. Requiere rol `admin`.
+- `DELETE /api/admin/categories/:id`: elimina categoría. Requiere rol `admin`.
+- `GET /api/admin/tags`: lista tags. Requiere JWT.
+- `GET /api/admin/authors`: lista autores. Requiere JWT.
+
+Los posts devuelven autor, categoría y tags asociados. Al crear o editar posts se pueden enviar tags como string separado por comas, por ejemplo:
+
+```json
+{
+  "tags": "javascript, node, backend, api"
+}
+```
+
+El backend normaliza los tags, reutiliza los existentes y crea los nuevos cuando haga falta.
+
+## Roles
+
+- `admin`: puede crear usuarios, administrar categorías y gestionar cualquier post.
+- `author`: puede crear posts, usar categorías existentes, agregar tags y editar solamente sus propios posts.
 
 Las rutas protegidas deben recibir:
 
@@ -106,7 +134,7 @@ El seed crea `admin@example.com` con contraseña `admin123`. Cambiarla antes de 
 2. Agregar PostgreSQL y copiar la `DATABASE_URL`.
 3. Configurar las variables de entorno del archivo `.env.example`.
 4. Configurar `FRONTEND_URL` con el dominio de Vercel.
-5. Ejecutar migraciones con `npm run prisma:migrate` desde Railway o localmente apuntando a la base de Railway.
+5. Ejecutar migraciones con `npm run prisma:deploy` en producción o `npm run prisma:migrate` en desarrollo.
 6. Railway usa `railway.json` para generar Prisma Client durante el build y ejecutar `npm start`.
 
 Railway define `PORT` automáticamente. El servidor usa `process.env.PORT`.
