@@ -79,6 +79,6 @@ El seed crea `admin@example.com` con contraseña `admin123`. Cambiarla antes de 
 3. Configurar las variables de entorno del archivo `.env.example`.
 4. Configurar `FRONTEND_URL` con el dominio de Vercel.
 5. Ejecutar migraciones con `npm run prisma:migrate` desde Railway o localmente apuntando a la base de Railway.
-6. Usar `npm start` como comando de inicio.
+6. Railway usa `railway.json` para generar Prisma Client durante el build y ejecutar `npm start`.
 
 Railway define `PORT` automáticamente. El servidor usa `process.env.PORT`.
