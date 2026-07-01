@@ -2,7 +2,35 @@
 
 API REST para OasisJS Blogger usando Node.js, Express, PostgreSQL, Prisma, JWT y Cloudinary.
 
-Repositorio sugerido: `https://github.com/rherrainz/oasis-back.git`
+## Datos del proyecto
+
+- Autor: Rodrigo Herrainz
+- Universidad / Facultad: Universidad Kennedy
+- Materia: Sistemas Multiplataformas
+- Sistema: OasisJS Blogger
+- Repositorio backend: `https://github.com/rherrainz/oasis-back.git`
+- Repositorio frontend: `https://github.com/rherrainz/oasis-front.git`
+
+Consultar también el repositorio frontend para ver la interfaz web, rutas públicas, panel de administración y configuración de Vercel.
+
+## Tecnologías usadas
+
+- Lenguaje: JavaScript
+- Runtime: Node.js
+- Sistema de módulos: ES Modules (`type: module`)
+- Framework HTTP: Express
+- Base de datos: PostgreSQL
+- ORM: Prisma
+- Autenticación: JSON Web Token (`jsonwebtoken`)
+- Hash de contraseñas: bcrypt
+- Carga de archivos: Multer
+- Repositorio de imágenes: Cloudinary
+- Configuración de entorno: dotenv
+- CORS: cors
+- Desarrollo local: nodemon
+- Gestor de paquetes: npm
+- Hosting backend: Railway
+- Configuración de deploy: `railway.json`
 
 ## Requisitos
 
