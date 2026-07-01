@@ -1,6 +1,6 @@
-const { PrismaClient } = require("@prisma/client");
-const cloudinary = require("../config/cloudinary");
-const { slugify } = require("../utils/slugify");
+import { PrismaClient } from "@prisma/client";
+import cloudinary from "../config/cloudinary.js";
+import { slugify } from "../utils/slugify.js";
 
 const prisma = new PrismaClient();
 
@@ -22,7 +22,7 @@ function validatePostInput(data) {
   return requiredFields.filter((field) => !data[field]);
 }
 
-async function listPublishedPosts(req, res, next) {
+export async function listPublishedPosts(req, res, next) {
   try {
     const posts = await prisma.post.findMany({
       where: { published: true },
@@ -34,7 +34,7 @@ async function listPublishedPosts(req, res, next) {
   }
 }
 
-async function getPublishedPostBySlug(req, res, next) {
+export async function getPublishedPostBySlug(req, res, next) {
   try {
     const post = await prisma.post.findFirst({
       where: { slug: req.params.slug, published: true }
@@ -50,7 +50,7 @@ async function getPublishedPostBySlug(req, res, next) {
   }
 }
 
-async function listAllPosts(req, res, next) {
+export async function listAllPosts(req, res, next) {
   try {
     const posts = await prisma.post.findMany({ orderBy: { created_at: "desc" } });
     return res.json(posts);
@@ -59,7 +59,7 @@ async function listAllPosts(req, res, next) {
   }
 }
 
-async function createPost(req, res, next) {
+export async function createPost(req, res, next) {
   try {
     const data = normalizePostInput(req.body);
     const missingFields = validatePostInput(data);
@@ -79,7 +79,7 @@ async function createPost(req, res, next) {
   }
 }
 
-async function updatePost(req, res, next) {
+export async function updatePost(req, res, next) {
   try {
     const id = Number(req.params.id);
     const data = normalizePostInput(req.body);
@@ -108,7 +108,7 @@ async function updatePost(req, res, next) {
   }
 }
 
-async function deletePost(req, res, next) {
+export async function deletePost(req, res, next) {
   try {
     const id = Number(req.params.id);
 
@@ -127,7 +127,7 @@ async function deletePost(req, res, next) {
   }
 }
 
-async function uploadCoverImage(req, res, next) {
+export async function uploadCoverImage(req, res, next) {
   try {
     if (!req.file) {
       return res.status(400).json({ message: "Archivo de imagen requerido." });
@@ -144,13 +144,3 @@ async function uploadCoverImage(req, res, next) {
     return next(error);
   }
 }
-
-module.exports = {
-  listPublishedPosts,
-  getPublishedPostBySlug,
-  listAllPosts,
-  createPost,
-  updatePost,
-  deletePost,
-  uploadCoverImage
-};

@@ -1,6 +1,6 @@
-const { PrismaClient } = require("@prisma/client");
-const bcrypt = require("bcrypt");
-const { slugify } = require("../src/utils/slugify");
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcrypt";
+import { slugify } from "../src/utils/slugify.js";
 
 const prisma = new PrismaClient();
 

@@ -1,5 +1,5 @@
-const express = require("express");
-const {
+import express from "express";
+import {
   listPublishedPosts,
   getPublishedPostBySlug,
   listAllPosts,
@@ -7,9 +7,9 @@ const {
   updatePost,
   deletePost,
   uploadCoverImage
-} = require("../controllers/postController");
-const { requireAuth } = require("../middleware/authMiddleware");
-const { upload } = require("../middleware/uploadMiddleware");
+} from "../controllers/postController.js";
+import { requireAuth } from "../middleware/authMiddleware.js";
+import { upload } from "../middleware/uploadMiddleware.js";
 
 const router = express.Router();
 
@@ -21,4 +21,4 @@ router.put("/admin/posts/:id", requireAuth, updatePost);
 router.delete("/admin/posts/:id", requireAuth, deletePost);
 router.post("/admin/upload", requireAuth, upload.single("image"), uploadCoverImage);
 
-module.exports = router;
+export default router;

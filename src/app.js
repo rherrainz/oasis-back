@@ -1,10 +1,10 @@
-require("dotenv").config();
+import "dotenv/config";
 
-const express = require("express");
-const cors = require("cors");
-const authRoutes = require("./routes/authRoutes");
-const postRoutes = require("./routes/postRoutes");
-const userRoutes = require("./routes/userRoutes");
+import express from "express";
+import cors from "cors";
+import authRoutes from "./routes/authRoutes.js";
+import postRoutes from "./routes/postRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 
 const app = express();
 
@@ -37,4 +37,4 @@ app.use((error, req, res, next) => {
   return res.status(500).json({ message: "Error interno del servidor." });
 });
 
-module.exports = app;
+export default app;

@@ -1,4 +1,4 @@
-function slugify(value) {
+export function slugify(value) {
   return value
     .toString()
     .normalize("NFD")
@@ -8,5 +8,3 @@ function slugify(value) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)+/g, "");
 }
-
-module.exports = { slugify };

@@ -1,6 +1,6 @@
-const { PrismaClient } = require("@prisma/client");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 const prisma = new PrismaClient();
 
@@ -8,7 +8,7 @@ function signToken(payload) {
   return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "8h" });
 }
 
-async function login(req, res, next) {
+export async function login(req, res, next) {
   try {
     const { email, password, adminKey } = req.body;
 
@@ -48,5 +48,3 @@ async function login(req, res, next) {
     return next(error);
   }
 }
-
-module.exports = { login };

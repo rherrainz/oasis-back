@@ -1,9 +1,9 @@
-const { PrismaClient } = require("@prisma/client");
-const bcrypt = require("bcrypt");
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
-async function createUser(req, res, next) {
+export async function createUser(req, res, next) {
   try {
     const { name, email, password } = req.body;
 
@@ -31,5 +31,3 @@ async function createUser(req, res, next) {
     return next(error);
   }
 }
-
-module.exports = { createUser };
