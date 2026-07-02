@@ -27,6 +27,7 @@ Consultar también el repositorio frontend para ver la interfaz web, rutas públ
 - Repositorio de imágenes: Cloudinary
 - Organización de contenido: categorías, tags y autores
 - Búsqueda: filtros por texto, categoría, tag, autor y estado
+- Auditoría: logs HTTP y registro de acciones administrativas
 - Configuración de entorno: dotenv
 - CORS: cors
 - Desarrollo local: nodemon
@@ -98,6 +99,9 @@ CLOUDINARY_API_SECRET=
 - `DELETE /api/admin/categories/:id`: elimina categoría. Requiere rol `admin`.
 - `GET /api/admin/tags`: lista tags. Requiere JWT.
 - `GET /api/admin/authors`: lista autores. Requiere JWT.
+- `GET /api/admin/audit-logs`: lista eventos de auditoría. Requiere rol `admin`.
+
+`GET /api/admin/audit-logs` acepta filtros por `action`, `entity`, `userEmail`, `from` y `to`. Devuelve hasta 200 eventos ordenados desde el más reciente.
 
 Los posts devuelven autor, categoría y tags asociados. Al crear o editar posts se pueden enviar tags como string separado por comas, por ejemplo:
 
@@ -119,6 +123,12 @@ Las rutas protegidas deben recibir:
 ```text
 Authorization: Bearer TOKEN
 ```
+
+## Auditoría
+
+El backend registra eventos de login, creación de usuarios, gestión de posts, publicación/despublicación, gestión de categorías y subida de imágenes. Cada evento guarda acción, entidad, usuario, IP, user agent, fecha y un detalle legible.
+
+Los logs HTTP se emiten con `pino-http`. La ruta `/api/health` no se registra para evitar ruido operativo.
 
 ## Crear primer administrador
 

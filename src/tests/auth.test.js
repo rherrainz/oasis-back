@@ -19,6 +19,10 @@ function adminToken() {
   return jwt.sign({ userId: 1, email: "admin@example.com", role: "admin" }, "test-secret");
 }
 
+function authorToken() {
+  return jwt.sign({ userId: 2, email: "author@example.com", role: "author" }, "test-secret");
+}
+
 describe("auth endpoints", () => {
   beforeEach(() => {
     resetPrismaMock();
@@ -32,12 +36,31 @@ describe("auth endpoints", () => {
 
     expect(response.body.token).toBeTruthy();
     expect(response.body.admin.role).toBe("admin");
+    expect(prismaMock.auditLog.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          action: "LOGIN_SUCCESS",
+          entity: "Auth",
+          detail: "Login con clave de administrador"
+        })
+      })
+    );
   });
 
   it("blocks administrative routes without JWT", async () => {
     const response = await request(app).get("/api/admin/posts").expect(401);
 
     expect(response.body.message).toContain("Token");
+  });
+
+  it("blocks audit logs from non-admin users", async () => {
+    const response = await request(app)
+      .get("/api/admin/audit-logs")
+      .set("Authorization", `Bearer ${authorToken()}`)
+      .expect(403);
+
+    expect(response.body.message).toContain("permisos");
+    expect(prismaMock.auditLog.findMany).not.toHaveBeenCalled();
   });
 
   it("returns audit logs to admin users", async () => {

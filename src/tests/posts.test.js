@@ -103,5 +103,27 @@ describe("post endpoints", () => {
       expect.objectContaining({ where: { slug: "api" } })
     );
     expect(prismaMock.post.create).toHaveBeenCalled();
+    expect(prismaMock.auditLog.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          userId: 1,
+          userEmail: "rodrigo@example.com",
+          action: "POST_CREATED",
+          entity: "Post",
+          entityId: 1,
+          detail: "Post creado: Node y React"
+        })
+      })
+    );
+    expect(prismaMock.auditLog.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          action: "POST_PUBLISHED",
+          entity: "Post",
+          entityId: 1,
+          detail: "Post publicado: Node y React"
+        })
+      })
+    );
   });
 });
