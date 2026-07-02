@@ -14,6 +14,7 @@ model User {
   password_hash String
   role          String   @default("author")
   posts         Post[]
+  auditLogs     AuditLog[]
   created_at    DateTime @default(now())
   updated_at    DateTime @updatedAt
 }
@@ -61,4 +62,24 @@ model PostTag {
   tag     Tag  @relation(fields: [tag_id], references: [id], onDelete: Cascade)
 
   @@id([post_id, tag_id])
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int?
+  userEmail String?
+  action    String
+  entity    String
+  entityId  Int?
+  detail    String?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([action])
+  @@index([entity])
+  @@index([userEmail])
+  @@index([createdAt])
 }

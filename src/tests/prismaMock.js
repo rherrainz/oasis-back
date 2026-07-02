@@ -18,6 +18,7 @@ export const prismaMock = {
   },
   category: {
     findMany: vi.fn(),
+    findUnique: vi.fn(),
     create: vi.fn(),
     update: vi.fn(),
     delete: vi.fn()
@@ -25,6 +26,10 @@ export const prismaMock = {
   tag: {
     findMany: vi.fn(),
     upsert: vi.fn()
+  },
+  auditLog: {
+    create: vi.fn(),
+    findMany: vi.fn()
   }
 };
 

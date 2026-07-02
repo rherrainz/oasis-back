@@ -15,6 +15,7 @@ import {
   deleteCategory
 } from "../controllers/categoryController.js";
 import { listAuthors, listTags } from "../controllers/taxonomyController.js";
+import { listAuditLogs } from "../controllers/auditLogController.js";
 import { requireAuth, requireRole } from "../middleware/authMiddleware.js";
 import { upload } from "../middleware/uploadMiddleware.js";
 
@@ -36,5 +37,6 @@ router.put("/admin/categories/:id", requireAuth, requireRole("admin"), updateCat
 router.delete("/admin/categories/:id", requireAuth, requireRole("admin"), deleteCategory);
 router.get("/admin/tags", requireAuth, listTags);
 router.get("/admin/authors", requireAuth, listAuthors);
+router.get("/admin/audit-logs", requireAuth, requireRole("admin"), listAuditLogs);
 
 export default router;

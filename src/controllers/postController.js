@@ -1,6 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 import cloudinary from "../config/cloudinary.js";
 import { slugify } from "../utils/slugify.js";
+import { AUDIT_ACTIONS, auditFromRequest } from "../utils/auditLogger.js";
+import { logger } from "../utils/logger.js";
 
 const prisma = new PrismaClient();
 
@@ -202,6 +204,7 @@ export async function createPost(req, res, next) {
     const missingFields = validatePostInput(data);
 
     if (missingFields.length > 0) {
+      logger.warn({ fields: missingFields, admin: req.admin?.email }, "Fallo de validación al crear post");
       return res.status(400).json({ message: "Faltan campos obligatorios.", fields: missingFields });
     }
 
@@ -220,16 +223,33 @@ export async function createPost(req, res, next) {
       },
       include: postInclude
     });
+    await auditFromRequest(req, {
+      action: AUDIT_ACTIONS.POST_CREATED,
+      entity: "Post",
+      entityId: post.id,
+      detail: `Post creado: ${post.title}`
+    });
+    if (post.published) {
+      await auditFromRequest(req, {
+        action: AUDIT_ACTIONS.POST_PUBLISHED,
+        entity: "Post",
+        entityId: post.id,
+        detail: `Post publicado: ${post.title}`
+      });
+    }
     return res.status(201).json(serializePost(post));
   } catch (error) {
     if (error.code === "P2002") {
+      logger.warn({ err: error, admin: req.admin?.email }, "Slug duplicado al crear post");
       return res.status(409).json({ message: "Ya existe un post con ese slug." });
     }
 
     if (error.code === "P2003") {
+      logger.warn({ err: error, admin: req.admin?.email }, "Autor o categoría inválidos al crear post");
       return res.status(400).json({ message: "Autor o categoría inválidos." });
     }
 
+    logger.error({ err: error }, "Error de base de datos al crear post");
     return next(error);
   }
 }
@@ -238,6 +258,7 @@ export async function updatePost(req, res, next) {
   try {
     const id = Number(req.params.id);
     if (!Number.isInteger(id)) {
+      logger.warn({ id: req.params.id, admin: req.admin?.email }, "ID inválido al actualizar post");
       return res.status(400).json({ message: "ID inválido." });
     }
 
@@ -252,9 +273,14 @@ export async function updatePost(req, res, next) {
 
     const missingFields = validatePostInput(data);
     if (missingFields.length > 0) {
+      logger.warn({ fields: missingFields, postId: id, admin: req.admin?.email }, "Fallo de validación al actualizar post");
       return res.status(400).json({ message: "Faltan campos obligatorios.", fields: missingFields });
     }
 
+    const previousPost = await prisma.post.findUnique({
+      where: { id },
+      select: { published: true, title: true }
+    });
     const tagConnections = await resolveTagConnections(data.tags);
     const post = await prisma.post.update({
       where: { id },
@@ -274,6 +300,20 @@ export async function updatePost(req, res, next) {
       },
       include: postInclude
     });
+    await auditFromRequest(req, {
+      action: AUDIT_ACTIONS.POST_UPDATED,
+      entity: "Post",
+      entityId: post.id,
+      detail: `Post actualizado: ${post.title}`
+    });
+    if (previousPost && previousPost.published !== post.published) {
+      await auditFromRequest(req, {
+        action: post.published ? AUDIT_ACTIONS.POST_PUBLISHED : AUDIT_ACTIONS.POST_UNPUBLISHED,
+        entity: "Post",
+        entityId: post.id,
+        detail: `${post.published ? "Post publicado" : "Post despublicado"}: ${post.title}`
+      });
+    }
     return res.json(serializePost(post));
   } catch (error) {
     if (error.code === "P2025") {
@@ -281,13 +321,16 @@ export async function updatePost(req, res, next) {
     }
 
     if (error.code === "P2002") {
+      logger.warn({ err: error, postId: req.params.id, admin: req.admin?.email }, "Slug duplicado al actualizar post");
       return res.status(409).json({ message: "Ya existe un post con ese slug." });
     }
 
     if (error.code === "P2003") {
+      logger.warn({ err: error, postId: req.params.id, admin: req.admin?.email }, "Autor o categoría inválidos al actualizar post");
       return res.status(400).json({ message: "Autor o categoría inválidos." });
     }
 
+    logger.error({ err: error }, "Error de base de datos al actualizar post");
     return next(error);
   }
 }
@@ -297,6 +340,7 @@ export async function deletePost(req, res, next) {
     const id = Number(req.params.id);
 
     if (!Number.isInteger(id)) {
+      logger.warn({ id: req.params.id, admin: req.admin?.email }, "ID inválido al eliminar post");
       return res.status(400).json({ message: "ID inválido." });
     }
 
@@ -304,13 +348,21 @@ export async function deletePost(req, res, next) {
       return res.status(403).json({ message: "No podés eliminar posts de otros autores." });
     }
 
+    const post = await prisma.post.findUnique({ where: { id }, select: { title: true } });
     await prisma.post.delete({ where: { id } });
+    await auditFromRequest(req, {
+      action: AUDIT_ACTIONS.POST_DELETED,
+      entity: "Post",
+      entityId: id,
+      detail: `Post eliminado: ${post?.title || id}`
+    });
     return res.status(204).send();
   } catch (error) {
     if (error.code === "P2025") {
       return res.status(404).json({ message: "Post no encontrado." });
     }
 
+    logger.error({ err: error }, "Error de base de datos al eliminar post");
     return next(error);
   }
 }
@@ -318,6 +370,7 @@ export async function deletePost(req, res, next) {
 export async function uploadCoverImage(req, res, next) {
   try {
     if (!req.file) {
+      logger.warn({ admin: req.admin?.email }, "Fallo de validación al subir imagen");
       return res.status(400).json({ message: "Archivo de imagen requerido." });
     }
 
@@ -327,8 +380,14 @@ export async function uploadCoverImage(req, res, next) {
       resource_type: "image"
     });
 
+    await auditFromRequest(req, {
+      action: AUDIT_ACTIONS.IMAGE_UPLOADED,
+      entity: "Image",
+      detail: `Imagen subida: ${result.secure_url}`
+    });
     return res.status(201).json({ url: result.secure_url });
   } catch (error) {
+    logger.error({ err: error }, "Fallo al subir imagen a Cloudinary");
     return next(error);
   }
 }
